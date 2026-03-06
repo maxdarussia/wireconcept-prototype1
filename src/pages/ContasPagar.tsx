@@ -12,9 +12,9 @@ export default function ContasPagar() {
   const { contas, addConta, updateConta, deleteConta, categorias } = useFinance();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Conta | null>(null);
-  const [form, setForm] = useState({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente' as const });
+  const [form, setForm] = useState({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente' as 'pendente' | 'pago' });
 
-  const resetForm = () => { setForm({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente' }); setEditing(null); };
+  const resetForm = () => { setForm({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente' as 'pendente' | 'pago' }); setEditing(null); };
 
   const handleSubmit = () => {
     if (!form.nome || !form.valor || !form.dataVencimento || !form.categoria) return;

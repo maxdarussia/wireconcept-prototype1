@@ -13,9 +13,9 @@ export default function Receitas() {
   const { receitas, addReceita, updateReceita, deleteReceita } = useFinance();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Receita | null>(null);
-  const [form, setForm] = useState({ descricao: '', valor: '', dataPrevista: '', status: 'pendente' as const, observacao: '' });
+  const [form, setForm] = useState({ descricao: '', valor: '', dataPrevista: '', status: 'pendente' as 'pendente' | 'recebido', observacao: '' });
 
-  const resetForm = () => { setForm({ descricao: '', valor: '', dataPrevista: '', status: 'pendente', observacao: '' }); setEditing(null); };
+  const resetForm = () => { setForm({ descricao: '', valor: '', dataPrevista: '', status: 'pendente' as 'pendente' | 'recebido', observacao: '' }); setEditing(null); };
 
   const handleSubmit = () => {
     if (!form.descricao || !form.valor || !form.dataPrevista) return;
