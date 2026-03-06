@@ -1,4 +1,4 @@
-import { LayoutDashboard, DollarSign, Receipt, CreditCard, BarChart3, Bell, Search } from 'lucide-react';
+import { LayoutDashboard, DollarSign, Receipt, CreditCard, BarChart3, Bell, Search, BookOpen, FileText } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -12,6 +12,8 @@ const items = [
   { title: 'Contas a Pagar', url: '/contas', icon: Receipt },
   { title: 'Cartões de Crédito', url: '/cartoes', icon: CreditCard },
   { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
+  { title: 'Plano de Contas', url: '/plano-contas', icon: BookOpen },
+  { title: 'Relatório DRE', url: '/dre', icon: FileText },
   { title: 'Busca de Gastos', url: '/busca', icon: Search },
   { title: 'Alertas de Gastos', url: '/alertas', icon: Bell },
 ];

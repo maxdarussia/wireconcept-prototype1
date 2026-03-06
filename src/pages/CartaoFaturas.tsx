@@ -14,7 +14,7 @@ import type { GastoFatura } from '@/types/finance';
 export default function CartaoFaturas() {
   const { cartaoId } = useParams<{ cartaoId: string }>();
   const navigate = useNavigate();
-  const { cartoes, faturas, gastos, addFatura, updateFatura, deleteFatura, addGasto, updateGasto, deleteGasto, categorias, addCategoria } = useFinance();
+  const { cartoes, faturas, gastos, addFatura, updateFatura, deleteFatura, addGasto, updateGasto, deleteGasto, categorias, addCategoria, planoContas } = useFinance();
 
   const cartao = cartoes.find(c => c.id === cartaoId);
   const cartaoFaturas = faturas.filter(f => f.cartaoId === cartaoId).sort((a, b) => b.mes.localeCompare(a.mes));
@@ -25,10 +25,15 @@ export default function CartaoFaturas() {
   const [openGasto, setOpenGasto] = useState(false);
   const [gastoFaturaId, setGastoFaturaId] = useState('');
   const [editingGasto, setEditingGasto] = useState<GastoFatura | null>(null);
-  const [gastoForm, setGastoForm] = useState({ descricao: '', valor: '', data: '', categoria: '', observacao: '' });
+  const [gastoForm, setGastoForm] = useState({ descricao: '', valor: '', data: '', categoria: '', observacao: '', contaContabil: '' });
   const [novaCategoria, setNovaCategoria] = useState('');
 
   const [expandedFatura, setExpandedFatura] = useState<string | null>(null);
+
+  // Leaf accounts for contaContabil selection
+  const leafContas = planoContas.filter(c => {
+    return !planoContas.some(other => other.parentId === c.id);
+  }).sort((a, b) => a.codigo.localeCompare(b.codigo));
 
   if (!cartao) {
     return (
@@ -51,20 +56,19 @@ export default function CartaoFaturas() {
   const handleGastoSubmit = () => {
     if (!gastoForm.descricao || !gastoForm.valor || !gastoForm.data || !gastoForm.categoria) return;
     const val = parseFloat(gastoForm.valor);
+    const payload = { descricao: gastoForm.descricao, valor: val, data: gastoForm.data, categoria: gastoForm.categoria, observacao: gastoForm.observacao, contaContabil: gastoForm.contaContabil || undefined, formaPagamento: cartao ? `Cartão ${cartao.nome}` : undefined };
     if (editingGasto) {
-      updateGasto(editingGasto.id, { ...gastoForm, valor: val });
-      // update fatura total
+      updateGasto(editingGasto.id, payload);
       const faturaGastos = gastos.filter(g => g.faturaId === editingGasto.faturaId && g.id !== editingGasto.id);
       const newTotal = faturaGastos.reduce((s, g) => s + g.valor, 0) + val;
       updateFatura(editingGasto.faturaId, { total: newTotal });
     } else {
-      addGasto({ ...gastoForm, valor: val, faturaId: gastoFaturaId, cartaoId: cartaoId! });
-      // update fatura total
+      addGasto({ ...payload, faturaId: gastoFaturaId, cartaoId: cartaoId! });
       const faturaGastos = gastos.filter(g => g.faturaId === gastoFaturaId);
       const newTotal = faturaGastos.reduce((s, g) => s + g.valor, 0) + val;
       updateFatura(gastoFaturaId, { total: newTotal });
     }
-    setGastoForm({ descricao: '', valor: '', data: '', categoria: '', observacao: '' });
+    setGastoForm({ descricao: '', valor: '', data: '', categoria: '', observacao: '', contaContabil: '' });
     setEditingGasto(null);
     setOpenGasto(false);
   };
@@ -77,7 +81,7 @@ export default function CartaoFaturas() {
   };
 
   const startEditGasto = (g: GastoFatura) => {
-    setGastoForm({ descricao: g.descricao, valor: String(g.valor), data: g.data, categoria: g.categoria, observacao: g.observacao || '' });
+    setGastoForm({ descricao: g.descricao, valor: String(g.valor), data: g.data, categoria: g.categoria, observacao: g.observacao || '', contaContabil: g.contaContabil || '' });
     setEditingGasto(g);
     setGastoFaturaId(g.faturaId);
     setOpenGasto(true);
@@ -86,7 +90,7 @@ export default function CartaoFaturas() {
   const openAddGasto = (faturaId: string) => {
     setGastoFaturaId(faturaId);
     setEditingGasto(null);
-    setGastoForm({ descricao: '', valor: '', data: '', categoria: '', observacao: '' });
+    setGastoForm({ descricao: '', valor: '', data: '', categoria: '', observacao: '', contaContabil: '' });
     setOpenGasto(true);
   };
 
@@ -184,6 +188,7 @@ export default function CartaoFaturas() {
                             <th className="text-right p-3 text-xs font-medium text-muted-foreground">Valor</th>
                             <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden sm:table-cell">Data</th>
                             <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Categoria</th>
+                            <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Conta Contábil</th>
                             <th className="text-right p-3 text-xs font-medium text-muted-foreground">Ações</th>
                           </tr>
                         </thead>
@@ -194,6 +199,9 @@ export default function CartaoFaturas() {
                               <td className="p-3 text-sm text-right font-semibold">{fmt(g.valor)}</td>
                               <td className="p-3 text-sm text-muted-foreground hidden sm:table-cell">{format(parseISO(g.data), 'dd/MM/yyyy')}</td>
                               <td className="p-3 text-sm text-muted-foreground hidden md:table-cell">{g.categoria}</td>
+                              <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">
+                                {g.contaContabil ? <span className="font-mono text-xs">{g.contaContabil}</span> : <span className="text-xs italic">—</span>}
+                              </td>
                               <td className="p-3 text-right">
                                 <div className="flex gap-1 justify-end">
                                   <Button variant="ghost" size="icon" onClick={() => startEditGasto(g)}><Pencil className="w-3 h-3" /></Button>
@@ -230,6 +238,15 @@ export default function CartaoFaturas() {
               <Input placeholder="Nova categoria" value={novaCategoria} onChange={e => setNovaCategoria(e.target.value)} />
               <Button variant="outline" onClick={handleAddCategoria} disabled={!novaCategoria.trim()}>Criar</Button>
             </div>
+            <Select value={gastoForm.contaContabil} onValueChange={v => setGastoForm(f => ({ ...f, contaContabil: v }))}>
+              <SelectTrigger><SelectValue placeholder="Categoria Contábil (DRE)" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Nenhuma</SelectItem>
+                {leafContas.map(c => (
+                  <SelectItem key={c.id} value={c.codigo}>{c.codigo} — {c.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Textarea placeholder="Observação (opcional)" value={gastoForm.observacao} onChange={e => setGastoForm(f => ({ ...f, observacao: e.target.value }))} />
             <Button className="w-full" onClick={handleGastoSubmit}>{editingGasto ? 'Salvar' : 'Adicionar'}</Button>
           </div>
