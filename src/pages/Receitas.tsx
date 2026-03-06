@@ -10,26 +10,29 @@ import { format, parseISO } from 'date-fns';
 import type { Receita } from '@/types/finance';
 
 export default function Receitas() {
-  const { receitas, addReceita, updateReceita, deleteReceita } = useFinance();
+  const { receitas, addReceita, updateReceita, deleteReceita, planoContas } = useFinance();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Receita | null>(null);
-  const [form, setForm] = useState({ descricao: '', valor: '', dataPrevista: '', status: 'pendente' as 'pendente' | 'recebido', observacao: '' });
+  const [form, setForm] = useState({ descricao: '', valor: '', dataPrevista: '', status: 'pendente' as 'pendente' | 'recebido', observacao: '', contaContabil: '' });
 
-  const resetForm = () => { setForm({ descricao: '', valor: '', dataPrevista: '', status: 'pendente' as 'pendente' | 'recebido', observacao: '' }); setEditing(null); };
+  const leafContas = planoContas.filter(c => c.tipo === 'receita' && !planoContas.some(other => other.parentId === c.id)).sort((a, b) => a.codigo.localeCompare(b.codigo));
+
+  const resetForm = () => { setForm({ descricao: '', valor: '', dataPrevista: '', status: 'pendente', observacao: '', contaContabil: '' }); setEditing(null); };
 
   const handleSubmit = () => {
     if (!form.descricao || !form.valor || !form.dataPrevista) return;
+    const payload = { descricao: form.descricao, valor: parseFloat(form.valor), dataPrevista: form.dataPrevista, status: form.status, observacao: form.observacao, contaContabil: form.contaContabil || undefined };
     if (editing) {
-      updateReceita(editing.id, { ...form, valor: parseFloat(form.valor) });
+      updateReceita(editing.id, payload);
     } else {
-      addReceita({ ...form, valor: parseFloat(form.valor) });
+      addReceita(payload);
     }
     resetForm();
     setOpen(false);
   };
 
   const startEdit = (r: Receita) => {
-    setForm({ descricao: r.descricao, valor: String(r.valor), dataPrevista: r.dataPrevista, status: r.status, observacao: r.observacao || '' });
+    setForm({ descricao: r.descricao, valor: String(r.valor), dataPrevista: r.dataPrevista, status: r.status, observacao: r.observacao || '', contaContabil: r.contaContabil || '' });
     setEditing(r);
     setOpen(true);
   };
@@ -62,6 +65,15 @@ export default function Receitas() {
                   <SelectItem value="recebido">Recebido</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={form.contaContabil} onValueChange={v => setForm(f => ({ ...f, contaContabil: v }))}>
+                <SelectTrigger><SelectValue placeholder="Categoria Contábil (DRE)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhuma</SelectItem>
+                  {leafContas.map(c => (
+                    <SelectItem key={c.id} value={c.codigo}>{c.codigo} — {c.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Textarea placeholder="Observação (opcional)" value={form.observacao} onChange={e => setForm(f => ({ ...f, observacao: e.target.value }))} />
               <Button className="w-full" onClick={handleSubmit}>{editing ? 'Salvar' : 'Adicionar'}</Button>
             </div>
@@ -76,19 +88,23 @@ export default function Receitas() {
               <th className="text-left p-3 text-sm font-medium text-muted-foreground">Descrição</th>
               <th className="text-right p-3 text-sm font-medium text-muted-foreground">Valor</th>
               <th className="text-left p-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">Data</th>
+              <th className="text-left p-3 text-sm font-medium text-muted-foreground hidden lg:table-cell">Contábil</th>
               <th className="text-left p-3 text-sm font-medium text-muted-foreground">Status</th>
               <th className="text-right p-3 text-sm font-medium text-muted-foreground">Ações</th>
             </tr>
           </thead>
           <tbody>
             {receitas.length === 0 && (
-              <tr><td colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Nenhuma receita cadastrada.</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 text-muted-foreground text-sm">Nenhuma receita cadastrada.</td></tr>
             )}
             {receitas.map(r => (
               <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
                 <td className="p-3 text-sm font-medium">{r.descricao}</td>
                 <td className="p-3 text-sm text-right font-semibold text-success">{fmt(r.valor)}</td>
                 <td className="p-3 text-sm text-muted-foreground hidden sm:table-cell">{format(parseISO(r.dataPrevista), 'dd/MM/yyyy')}</td>
+                <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">
+                  {r.contaContabil ? <span className="font-mono text-xs">{r.contaContabil}</span> : '—'}
+                </td>
                 <td className="p-3">
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${r.status === 'recebido' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
                     {r.status === 'recebido' ? 'Recebido' : 'Pendente'}

@@ -9,26 +9,29 @@ import { format, parseISO } from 'date-fns';
 import type { Conta } from '@/types/finance';
 
 export default function ContasPagar() {
-  const { contas, addConta, updateConta, deleteConta, categorias } = useFinance();
+  const { contas, addConta, updateConta, deleteConta, categorias, planoContas, formasPagamento } = useFinance();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Conta | null>(null);
-  const [form, setForm] = useState({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente' as 'pendente' | 'pago' });
+  const [form, setForm] = useState({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente' as 'pendente' | 'pago', contaContabil: '', formaPagamento: '' });
 
-  const resetForm = () => { setForm({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente' as 'pendente' | 'pago' }); setEditing(null); };
+  const leafContas = planoContas.filter(c => c.tipo === 'despesa' && !planoContas.some(other => other.parentId === c.id)).sort((a, b) => a.codigo.localeCompare(b.codigo));
+
+  const resetForm = () => { setForm({ nome: '', valor: '', dataVencimento: '', categoria: '', status: 'pendente', contaContabil: '', formaPagamento: '' }); setEditing(null); };
 
   const handleSubmit = () => {
     if (!form.nome || !form.valor || !form.dataVencimento || !form.categoria) return;
+    const payload = { nome: form.nome, valor: parseFloat(form.valor), dataVencimento: form.dataVencimento, categoria: form.categoria, status: form.status, contaContabil: form.contaContabil || undefined, formaPagamento: form.formaPagamento || undefined };
     if (editing) {
-      updateConta(editing.id, { ...form, valor: parseFloat(form.valor) });
+      updateConta(editing.id, payload);
     } else {
-      addConta({ ...form, valor: parseFloat(form.valor) });
+      addConta(payload);
     }
     resetForm();
     setOpen(false);
   };
 
   const startEdit = (c: Conta) => {
-    setForm({ nome: c.nome, valor: String(c.valor), dataVencimento: c.dataVencimento, categoria: c.categoria, status: c.status });
+    setForm({ nome: c.nome, valor: String(c.valor), dataVencimento: c.dataVencimento, categoria: c.categoria, status: c.status, contaContabil: c.contaContabil || '', formaPagamento: c.formaPagamento || '' });
     setEditing(c);
     setOpen(true);
   };
@@ -60,6 +63,22 @@ export default function ContasPagar() {
                   {categorias.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Select value={form.contaContabil} onValueChange={v => setForm(f => ({ ...f, contaContabil: v }))}>
+                <SelectTrigger><SelectValue placeholder="Categoria Contábil (DRE)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhuma</SelectItem>
+                  {leafContas.map(c => (
+                    <SelectItem key={c.id} value={c.codigo}>{c.codigo} — {c.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={form.formaPagamento} onValueChange={v => setForm(f => ({ ...f, formaPagamento: v }))}>
+                <SelectTrigger><SelectValue placeholder="Forma de Pagamento" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Não informado</SelectItem>
+                  {formasPagamento.map(fp => <SelectItem key={fp} value={fp}>{fp}</SelectItem>)}
+                </SelectContent>
+              </Select>
               <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v as 'pendente' | 'pago' }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -81,13 +100,14 @@ export default function ContasPagar() {
               <th className="text-right p-3 text-sm font-medium text-muted-foreground">Valor</th>
               <th className="text-left p-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">Vencimento</th>
               <th className="text-left p-3 text-sm font-medium text-muted-foreground hidden md:table-cell">Categoria</th>
+              <th className="text-left p-3 text-sm font-medium text-muted-foreground hidden lg:table-cell">Contábil</th>
               <th className="text-left p-3 text-sm font-medium text-muted-foreground">Status</th>
               <th className="text-right p-3 text-sm font-medium text-muted-foreground">Ações</th>
             </tr>
           </thead>
           <tbody>
             {contas.length === 0 && (
-              <tr><td colSpan={6} className="text-center py-8 text-muted-foreground text-sm">Nenhuma conta cadastrada.</td></tr>
+              <tr><td colSpan={7} className="text-center py-8 text-muted-foreground text-sm">Nenhuma conta cadastrada.</td></tr>
             )}
             {contas.map(c => (
               <tr key={c.id} className="border-b last:border-0 hover:bg-muted/30">
@@ -95,6 +115,9 @@ export default function ContasPagar() {
                 <td className="p-3 text-sm text-right font-semibold text-destructive">{fmt(c.valor)}</td>
                 <td className="p-3 text-sm text-muted-foreground hidden sm:table-cell">{format(parseISO(c.dataVencimento), 'dd/MM/yyyy')}</td>
                 <td className="p-3 text-sm text-muted-foreground hidden md:table-cell">{c.categoria}</td>
+                <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">
+                  {c.contaContabil ? <span className="font-mono text-xs">{c.contaContabil}</span> : '—'}
+                </td>
                 <td className="p-3">
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${c.status === 'pago' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
                     {c.status === 'pago' ? 'Pago' : 'Pendente'}
