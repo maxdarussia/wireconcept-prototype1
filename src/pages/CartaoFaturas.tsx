@@ -91,16 +91,19 @@ export default function CartaoFaturas() {
       const valorParcela = Math.round((valorTotal / numParcelas) * 100) / 100;
       const compraOriginalId = crypto.randomUUID();
       const currentFatura = faturas.find(f => f.id === gastoFaturaId);
-      if (!currentFatura) return;
+      if (!currentFatura || !currentFatura.mes.match(/^\d{4}-\d{2}$/)) return;
 
       const [baseYear, baseMonth] = currentFatura.mes.split('-').map(Number);
+      if (isNaN(baseYear) || isNaN(baseMonth)) return;
 
       // Track new parcels per fatura to update totals
       const parcelsByFatura: Record<string, number> = {};
 
       for (let i = 0; i < numParcelas; i++) {
-        const parcelaDate = new Date(baseYear, baseMonth - 1 + i, 1);
-        const mes = `${parcelaDate.getFullYear()}-${String(parcelaDate.getMonth() + 1).padStart(2, '0')}`;
+        const totalMonths = (baseYear * 12 + (baseMonth - 1)) + i;
+        const y = Math.floor(totalMonths / 12);
+        const m = (totalMonths % 12) + 1;
+        const mes = `${y}-${String(m).padStart(2, '0')}`;
 
         let targetFaturaId: string;
         if (i === 0) {
