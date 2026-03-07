@@ -56,14 +56,10 @@ export default function CartaoFaturas() {
   const emptyForm = { descricao: '', valor: '', data: '', categoria: '', observacao: '', contaContabil: '', parcelas: '1' };
 
   // Helper to get or create a fatura for a given month
-  const getOrCreateFatura = (mes: string): string => {
+  const getOrCreateFaturaId = (mes: string): string => {
     const existing = faturas.find(f => f.cartaoId === cartaoId && f.mes === mes);
     if (existing) return existing.id;
-    // We need to create it — use a temp id approach via addFatura
-    addFatura({ cartaoId: cartaoId!, mes, total: 0 });
-    // Since addFatura uses crypto.randomUUID we can't get the id directly,
-    // but we'll recalculate totals after all parcels are added
-    return '';
+    return addFatura({ cartaoId: cartaoId!, mes, total: 0 });
   };
 
   const handleGastoSubmit = () => {
