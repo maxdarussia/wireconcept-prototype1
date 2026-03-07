@@ -312,8 +312,21 @@ export default function CartaoFaturas() {
         <DialogContent>
           <DialogHeader><DialogTitle>{editingGasto ? 'Editar Gasto' : 'Novo Gasto'}</DialogTitle></DialogHeader>
           <div className="space-y-4 mt-2">
-            <Input placeholder="Descrição (ex: Burger King)" value={gastoForm.descricao} onChange={e => setGastoForm(f => ({ ...f, descricao: e.target.value }))} />
-            <Input type="number" placeholder="Valor" value={gastoForm.valor} onChange={e => setGastoForm(f => ({ ...f, valor: e.target.value }))} />
+            <Input placeholder="Descrição (ex: Notebook Amazon)" value={gastoForm.descricao} onChange={e => setGastoForm(f => ({ ...f, descricao: e.target.value }))} />
+            <div className="flex gap-2">
+              <Input type="number" placeholder="Valor total" value={gastoForm.valor} onChange={e => setGastoForm(f => ({ ...f, valor: e.target.value }))} className="flex-1" />
+              {!editingGasto && (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-muted-foreground whitespace-nowrap">Parcelas:</label>
+                  <Input type="number" min="1" max="48" value={gastoForm.parcelas} onChange={e => setGastoForm(f => ({ ...f, parcelas: e.target.value }))} className="w-20" />
+                </div>
+              )}
+            </div>
+            {!editingGasto && parseInt(gastoForm.parcelas) > 1 && gastoForm.valor && (
+              <p className="text-xs text-muted-foreground">
+                {parseInt(gastoForm.parcelas)}x de {fmt(Math.round((parseFloat(gastoForm.valor) / parseInt(gastoForm.parcelas)) * 100) / 100)}
+              </p>
+            )}
             <Input type="date" value={gastoForm.data} onChange={e => setGastoForm(f => ({ ...f, data: e.target.value }))} />
             <Select value={gastoForm.categoria} onValueChange={v => setGastoForm(f => ({ ...f, categoria: v }))}>
               <SelectTrigger><SelectValue placeholder="Categoria" /></SelectTrigger>
@@ -335,7 +348,7 @@ export default function CartaoFaturas() {
               </SelectContent>
             </Select>
             <Textarea placeholder="Observação (opcional)" value={gastoForm.observacao} onChange={e => setGastoForm(f => ({ ...f, observacao: e.target.value }))} />
-            <Button className="w-full" onClick={handleGastoSubmit}>{editingGasto ? 'Salvar' : 'Adicionar'}</Button>
+            <Button className="w-full" onClick={handleGastoSubmit}>{editingGasto ? 'Salvar' : (parseInt(gastoForm.parcelas) > 1 ? `Adicionar ${gastoForm.parcelas}x parcelas` : 'Adicionar')}</Button>
           </div>
         </DialogContent>
       </Dialog>
