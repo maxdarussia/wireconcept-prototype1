@@ -99,19 +99,11 @@ export default function CartaoFaturas() {
         const parcelaDate = new Date(baseYear, baseMonth - 1 + i, 1);
         const mes = `${parcelaDate.getFullYear()}-${String(parcelaDate.getMonth() + 1).padStart(2, '0')}`;
 
-        // Find or create fatura for this month
         let targetFaturaId: string;
         if (i === 0) {
           targetFaturaId = gastoFaturaId;
         } else {
-          const existingFatura = faturas.find(f => f.cartaoId === cartaoId && f.mes === mes);
-          if (existingFatura) {
-            targetFaturaId = existingFatura.id;
-          } else {
-            addFatura({ cartaoId: cartaoId!, mes, total: 0 });
-            // We'll update totals after — set empty for now
-            targetFaturaId = '__pending_' + mes;
-          }
+          targetFaturaId = getOrCreateFaturaId(mes);
         }
 
         // Adjust last parcela for rounding
