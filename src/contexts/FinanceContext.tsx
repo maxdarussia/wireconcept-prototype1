@@ -77,7 +77,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [receitas, setReceitas] = useState<Receita[]>(() => load('fin_receitas', []));
   const [contas, setContas] = useState<Conta[]>(() => load('fin_contas', []));
   const [cartoes, setCartoes] = useState<Cartao[]>(() => load('fin_cartoes', []));
-  const [faturas, setFaturas] = useState<Fatura[]>(() => load('fin_faturas', []));
+  const [faturas, setFaturas] = useState<Fatura[]>(() => {
+    const loaded = load<Fatura[]>('fin_faturas', []);
+    // Clean up corrupted faturas with invalid mes
+    return loaded.filter(f => f.mes && /^\d{4}-\d{2}$/.test(f.mes));
+  });
   const [gastos, setGastos] = useState<GastoFatura[]>(() => load('fin_gastos', []));
   const [alertas, setAlertas] = useState<AlertaGasto[]>(() => load('fin_alertas', []));
   const [categorias, setCategorias] = useState<string[]>(() => load('fin_categorias', CATEGORIAS_INIT));
