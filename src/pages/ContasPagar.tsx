@@ -63,19 +63,19 @@ export default function ContasPagar() {
                   {categorias.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Select value={form.contaContabil} onValueChange={v => setForm(f => ({ ...f, contaContabil: v }))}>
+              <Select value={form.contaContabil || '__none__'} onValueChange={v => setForm(f => ({ ...f, contaContabil: v === '__none__' ? '' : v }))}>
                 <SelectTrigger><SelectValue placeholder="Categoria Contábil (DRE)" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma</SelectItem>
+                  <SelectItem value="__none__">Nenhuma</SelectItem>
                   {leafContas.map(c => (
                     <SelectItem key={c.id} value={c.codigo}>{c.codigo} — {c.nome}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={form.formaPagamento} onValueChange={v => setForm(f => ({ ...f, formaPagamento: v }))}>
+              <Select value={form.formaPagamento || '__none__'} onValueChange={v => setForm(f => ({ ...f, formaPagamento: v === '__none__' ? '' : v }))}>
                 <SelectTrigger><SelectValue placeholder="Forma de Pagamento" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Não informado</SelectItem>
+                  <SelectItem value="__none__">Não informado</SelectItem>
                   {formasPagamento.map(fp => <SelectItem key={fp} value={fp}>{fp}</SelectItem>)}
                 </SelectContent>
               </Select>

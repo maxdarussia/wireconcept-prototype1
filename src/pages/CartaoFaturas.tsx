@@ -327,10 +327,10 @@ export default function CartaoFaturas() {
               <Input placeholder="Nova categoria" value={novaCategoria} onChange={e => setNovaCategoria(e.target.value)} />
               <Button variant="outline" onClick={handleAddCategoria} disabled={!novaCategoria.trim()}>Criar</Button>
             </div>
-            <Select value={gastoForm.contaContabil} onValueChange={v => setGastoForm(f => ({ ...f, contaContabil: v }))}>
+            <Select value={gastoForm.contaContabil || '__none__'} onValueChange={v => setGastoForm(f => ({ ...f, contaContabil: v === '__none__' ? '' : v }))}>
               <SelectTrigger><SelectValue placeholder="Categoria Contábil (DRE)" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhuma</SelectItem>
+                <SelectItem value="__none__">Nenhuma</SelectItem>
                 {leafContas.map(c => (
                   <SelectItem key={c.id} value={c.codigo}>{c.codigo} — {c.nome}</SelectItem>
                 ))}

@@ -65,10 +65,10 @@ export default function Receitas() {
                   <SelectItem value="recebido">Recebido</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={form.contaContabil} onValueChange={v => setForm(f => ({ ...f, contaContabil: v }))}>
+              <Select value={form.contaContabil || '__none__'} onValueChange={v => setForm(f => ({ ...f, contaContabil: v === '__none__' ? '' : v }))}>
                 <SelectTrigger><SelectValue placeholder="Categoria Contábil (DRE)" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma</SelectItem>
+                  <SelectItem value="__none__">Nenhuma</SelectItem>
                   {leafContas.map(c => (
                     <SelectItem key={c.id} value={c.codigo}>{c.codigo} — {c.nome}</SelectItem>
                   ))}
