@@ -25,7 +25,7 @@ export default function CartaoFaturas() {
   const [openGasto, setOpenGasto] = useState(false);
   const [gastoFaturaId, setGastoFaturaId] = useState('');
   const [editingGasto, setEditingGasto] = useState<GastoFatura | null>(null);
-  const [gastoForm, setGastoForm] = useState({ descricao: '', valor: '', data: '', categoria: '', observacao: '', contaContabil: '' });
+  const [gastoForm, setGastoForm] = useState({ descricao: '', valor: '', data: '', categoria: '', observacao: '', contaContabil: '', parcelas: '1' });
   const [novaCategoria, setNovaCategoria] = useState('');
 
   const [expandedFatura, setExpandedFatura] = useState<string | null>(null);

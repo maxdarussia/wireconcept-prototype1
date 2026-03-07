@@ -43,6 +43,9 @@ export interface GastoFatura {
   observacao?: string;
   contaContabil?: string;
   formaPagamento?: string;
+  parcelas?: number;        // total de parcelas
+  parcelaAtual?: number;    // número da parcela atual (1-indexed)
+  compraOriginalId?: string; // id que agrupa todas as parcelas de uma compra
 }
 
 export interface AlertaGasto {
