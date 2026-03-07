@@ -180,6 +180,7 @@ export default function CartaoFaturas() {
   const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const formatMes = (mes: string) => {
+    if (!mes || !mes.match(/^\d{4}-\d{2}$/)) return mes || '—';
     const [y, m] = mes.split('-');
     const d = new Date(parseInt(y), parseInt(m) - 1, 1);
     return format(d, 'MMMM yyyy', { locale: ptBR }).replace(/^\w/, c => c.toUpperCase());
