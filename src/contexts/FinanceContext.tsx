@@ -23,10 +23,10 @@ interface FinanceContextType extends FinanceData {
   addCartao: (c: Omit<Cartao, 'id'>) => void;
   updateCartao: (id: string, c: Partial<Cartao>) => void;
   deleteCartao: (id: string) => void;
-  addFatura: (f: Omit<Fatura, 'id'>) => void;
+  addFatura: (f: Omit<Fatura, 'id'>) => string;
   updateFatura: (id: string, f: Partial<Fatura>) => void;
   deleteFatura: (id: string) => void;
-  addGasto: (g: Omit<GastoFatura, 'id'>) => void;
+  addGasto: (g: Omit<GastoFatura, 'id'>) => string;
   updateGasto: (id: string, g: Partial<GastoFatura>) => void;
   deleteGasto: (id: string) => void;
   addAlerta: (a: Omit<AlertaGasto, 'id'>) => void;
@@ -108,7 +108,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setGastos(p => p.filter(x => x.cartaoId !== id));
   }, []);
 
-  const addFatura = useCallback((f: Omit<Fatura, 'id'>) => setFaturas(p => [...p, { ...f, id: uid() }]), []);
+  const addFatura = useCallback((f: Omit<Fatura, 'id'>) => {
+    const id = uid();
+    setFaturas(p => [...p, { ...f, id }]);
+    return id;
+  }, []);
   const updateFatura = useCallback((id: string, f: Partial<Fatura>) => setFaturas(p => p.map(x => x.id === id ? { ...x, ...f } : x)), []);
   const deleteFatura = useCallback((id: string) => {
     setFaturas(p => p.filter(x => x.id !== id));
@@ -116,7 +120,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const addGasto = useCallback((g: Omit<GastoFatura, 'id'>) => {
-    setGastos(p => [...p, { ...g, id: uid() }]);
+    const id = uid();
+    setGastos(p => [...p, { ...g, id }]);
+    return id;
   }, []);
   const updateGasto = useCallback((id: string, g: Partial<GastoFatura>) => setGastos(p => p.map(x => x.id === id ? { ...x, ...g } : x)), []);
   const deleteGasto = useCallback((id: string) => setGastos(p => p.filter(x => x.id !== id)), []);
