@@ -95,6 +95,9 @@ export default function CartaoFaturas() {
 
       const [baseYear, baseMonth] = currentFatura.mes.split('-').map(Number);
 
+      // Track new parcels per fatura to update totals
+      const parcelsByFatura: Record<string, number> = {};
+
       for (let i = 0; i < numParcelas; i++) {
         const parcelaDate = new Date(baseYear, baseMonth - 1 + i, 1);
         const mes = `${parcelaDate.getFullYear()}-${String(parcelaDate.getMonth() + 1).padStart(2, '0')}`;
@@ -111,19 +114,25 @@ export default function CartaoFaturas() {
           ? Math.round((valorTotal - valorParcela * (numParcelas - 1)) * 100) / 100
           : valorParcela;
 
-        const parcelaDataStr = gastoForm.data; // keep original date for all parcels
+        parcelsByFatura[targetFaturaId] = (parcelsByFatura[targetFaturaId] || 0) + valor;
 
         addGasto({
           ...basePayload,
           descricao: `${gastoForm.descricao} (${i + 1}/${numParcelas})`,
           valor,
-          data: parcelaDataStr,
+          data: gastoForm.data,
           faturaId: targetFaturaId,
           cartaoId: cartaoId!,
           parcelas: numParcelas,
           parcelaAtual: i + 1,
           compraOriginalId,
         });
+      }
+
+      // Update totals for all affected faturas
+      for (const [fId, addedVal] of Object.entries(parcelsByFatura)) {
+        const existingTotal = gastos.filter(g => g.faturaId === fId).reduce((s, g) => s + g.valor, 0);
+        updateFatura(fId, { total: existingTotal + addedVal });
       }
     }
 
