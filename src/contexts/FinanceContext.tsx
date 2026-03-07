@@ -15,7 +15,6 @@ interface FinanceData {
 
 interface FinanceContextType extends FinanceData {
   addReceita: (r: Omit<Receita, 'id'>) => void;
-  addReceitaReturn: (r: Omit<Receita, 'id'>) => string;
   updateReceita: (id: string, r: Partial<Receita>) => void;
   deleteReceita: (id: string) => void;
   addConta: (c: Omit<Conta, 'id'>) => void;
