@@ -39,6 +39,7 @@ const App = () => (
               <Route path="/alertas" element={<Alertas />} />
               <Route path="/plano-contas" element={<PlanoContas />} />
               <Route path="/dre" element={<RelatorioDRE />} />
+              <Route path="/resumo-dre" element={<ResumoAnualDRE />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

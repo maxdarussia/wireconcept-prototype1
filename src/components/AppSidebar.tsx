@@ -14,6 +14,7 @@ const items = [
 { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
 { title: 'Plano de Contas', url: '/plano-contas', icon: BookOpen },
 { title: 'Relatório DRE', url: '/dre', icon: FileText },
+{ title: 'Resumo Anual (DRE)', url: '/resumo-dre', icon: ClipboardList },
 { title: 'Busca de Gastos', url: '/busca', icon: Search },
 { title: 'Alertas de Gastos', url: '/alertas', icon: Bell }];
 
