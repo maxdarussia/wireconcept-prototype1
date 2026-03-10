@@ -15,6 +15,7 @@ import Busca from "./pages/Busca";
 import Alertas from "./pages/Alertas";
 import PlanoContas from "./pages/PlanoContas";
 import RelatorioDRE from "./pages/RelatorioDRE";
+import ResumoAnualDRE from "./pages/ResumoAnualDRE";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/alertas" element={<Alertas />} />
               <Route path="/plano-contas" element={<PlanoContas />} />
               <Route path="/dre" element={<RelatorioDRE />} />
+              <Route path="/resumo-dre" element={<ResumoAnualDRE />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
