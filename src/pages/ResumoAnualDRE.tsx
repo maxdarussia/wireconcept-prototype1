@@ -22,7 +22,7 @@ interface ResumoGerado {
   dados?: DREDadosCompletos;
 }
 
-const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const fmt = (v: number) => (v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const HISTORICO_KEY = 'fin_resumo_dre_historico';
 const EMPRESA_KEY = 'fin_empresa_dre';
