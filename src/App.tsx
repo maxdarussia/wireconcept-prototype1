@@ -15,6 +15,7 @@ import Busca from "./pages/Busca";
 import Alertas from "./pages/Alertas";
 import PlanoContas from "./pages/PlanoContas";
 import RelatorioDRE from "./pages/RelatorioDRE";
+import ResumoAnualDRE from "./pages/ResumoAnualDRE";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
